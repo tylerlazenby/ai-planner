@@ -91,7 +91,7 @@ export default function CreatePlanPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-3xl">
-            <h1 className="text-3xl font-bold tracking-tight mb-6">Create Today's Plan</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-6">Create Today&apos;s Plan</h1>
 
             <Alert className="mb-6">
                 <Info className="h-4 w-4" />
@@ -160,4 +160,3 @@ export default function CreatePlanPage() {
         </div>
     )
 }
-

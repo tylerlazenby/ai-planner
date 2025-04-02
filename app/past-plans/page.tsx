@@ -78,8 +78,10 @@ export default function PastPlansPage() {
     }
 
     // Get completion status label and color
-    const getCompletionStatus = (rate: number) => {
-        if (rate === 100) return { label: "Completed", variant: "success" as const }
+    const getCompletionStatus = (rate: number): {
+        label: string, variant: 'default' | 'secondary' | 'outline' | 'destructive' | null | undefined
+    } => {
+        if (rate === 100) return { label: "Completed", variant: "default" as const }
         if (rate >= 75) return { label: "Almost Complete", variant: "default" as const }
         if (rate >= 50) return { label: "In Progress", variant: "secondary" as const }
         if (rate > 0) return { label: "Started", variant: "outline" as const }

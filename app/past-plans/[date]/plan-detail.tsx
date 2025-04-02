@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { format, addMinutes, parse, isWithinInterval } from "date-fns"
-import { CalendarCheck, Clock, Info } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { format, addMinutes, parse, isWithinInterval, parseISO } from "date-fns"
+import { ArrowLeft, CalendarCheck, Clock, Info } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-// Define proper types
+// Define proper types for our data
 interface Task {
     id: string
     title: string
@@ -35,53 +36,153 @@ interface TimeSlot {
     isHourStart: boolean
 }
 
-// Sample data - in a real app, this would come from your backend
-const samplePlan: Plan = {
-    date: new Date(),
-    tasks: [
-        {
-            id: "1",
-            title: "Prepare for meeting with Jessica",
-            startTime: "11:00",
-            endTime: "12:30",
-            duration: "1.5 hours",
-            description: "Review presentation slides and gather necessary data for the quarterly review meeting.",
-            completed: false,
-            priority: "high",
-        },
-        {
-            id: "2",
-            title: "Go for a 20 minute run",
-            startTime: "13:00",
-            endTime: "13:30",
-            duration: "30 minutes",
-            description: "Quick cardio session to boost energy levels before afternoon tasks.",
-            completed: false,
+// Sample data generator for a specific date
+const generatePlanForDate = (dateStr: string): Plan => {
+    const date = parseISO(dateStr)
+
+    // Generate random tasks based on the date
+    const dayOfWeek = date.getDay()
+    const tasks: Task[] = []
+
+    // Different task templates based on day of week
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+        // Weekend tasks
+        tasks.push({
+            id: `${dateStr}-1`,
+            title: "Morning exercise",
+            startTime: "09:00",
+            endTime: "10:00",
+            duration: "1 hour",
+            description: "Weekend fitness routine to stay active.",
+            completed: Math.random() > 0.3,
             priority: "medium",
-        },
-        {
-            id: "3",
-            title: "Mow the lawn",
+        })
+
+        tasks.push({
+            id: `${dateStr}-2`,
+            title: "Grocery shopping",
+            startTime: "11:30",
+            endTime: "12:30",
+            duration: "1 hour",
+            description: "Get supplies for the week ahead.",
+            completed: Math.random() > 0.3,
+            priority: "medium",
+        })
+
+        tasks.push({
+            id: `${dateStr}-3`,
+            title: "Family lunch",
+            startTime: "13:00",
+            endTime: "14:30",
+            duration: "1.5 hours",
+            description: "Enjoy a meal with the family.",
+            completed: Math.random() > 0.3,
+            priority: "high",
+        })
+
+        tasks.push({
+            id: `${dateStr}-4`,
+            title: "House cleaning",
+            startTime: "15:30",
+            endTime: "17:00",
+            duration: "1.5 hours",
+            description: "Weekly cleaning routine.",
+            completed: Math.random() > 0.5,
+            priority: "medium",
+        })
+    } else {
+        // Weekday tasks
+        tasks.push({
+            id: `${dateStr}-1`,
+            title: "Morning team meeting",
+            startTime: "09:00",
+            endTime: "10:00",
+            duration: "1 hour",
+            description: "Daily sync with the team to discuss priorities.",
+            completed: Math.random() > 0.2,
+            priority: "high",
+        })
+
+        tasks.push({
+            id: `${dateStr}-2`,
+            title: "Project work",
+            startTime: "10:30",
+            endTime: "12:00",
+            duration: "1.5 hours",
+            description: "Focus time on current project deliverables.",
+            completed: Math.random() > 0.3,
+            priority: "high",
+        })
+
+        tasks.push({
+            id: `${dateStr}-3`,
+            title: "Lunch break",
+            startTime: "12:00",
+            endTime: "13:00",
+            duration: "1 hour",
+            description: "Break for lunch and short walk.",
+            completed: Math.random() > 0.1,
+            priority: "medium",
+        })
+
+        tasks.push({
+            id: `${dateStr}-4`,
+            title: "Client call",
             startTime: "14:00",
             endTime: "15:00",
             duration: "1 hour",
-            description: "Complete yard maintenance while the weather is good.",
-            completed: false,
-            priority: "medium",
-        },
-        {
-            id: "4",
-            title: "Help daughter with science project",
-            startTime: "16:00",
-            endTime: "17:30",
-            duration: "1.5 hours",
-            description: "Assist with the volcano experiment and help prepare the presentation board.",
-            completed: false,
+            description: "Weekly check-in with the client.",
+            completed: Math.random() > 0.3,
             priority: "high",
-        },
-    ],
-    explanation:
-        "We've prioritized the meeting preparation and science project help as these are tasks that can't be skipped. Since it's a school day, we've scheduled the science project help for late afternoon when your daughter will be home. We've also bundled the outdoor activities together in the early afternoon when you'll have a break between important commitments.",
+        })
+
+        tasks.push({
+            id: `${dateStr}-5`,
+            title: "Gym session",
+            startTime: "17:30",
+            endTime: "18:30",
+            duration: "1 hour",
+            description: "Workout at the local gym.",
+            completed: Math.random() > 0.5,
+            priority: "medium",
+        })
+    }
+
+    // Add some randomness to the tasks
+    if (Math.random() > 0.5) {
+        tasks.push({
+            id: `${dateStr}-extra-1`,
+            title: "Read book",
+            startTime: "20:00",
+            endTime: "21:00",
+            duration: "1 hour",
+            description: "Continue reading current book.",
+            completed: Math.random() > 0.6,
+            priority: "low",
+        })
+    }
+
+    if (Math.random() > 0.7) {
+        tasks.push({
+            id: `${dateStr}-extra-2`,
+            title: "Call parents",
+            startTime: "19:00",
+            endTime: "19:30",
+            duration: "30 minutes",
+            description: "Weekly check-in call with family.",
+            completed: Math.random() > 0.4,
+            priority: "medium",
+        })
+    }
+
+    return {
+        date: date,
+        tasks: tasks,
+        explanation:
+            dayOfWeek === 0 || dayOfWeek === 6
+                ? "This weekend plan balances productive tasks with family time. We've scheduled the most energy-intensive activities earlier in the day, leaving the afternoon for family lunch and later hours for household chores."
+                : "This weekday plan prioritizes work commitments while ensuring breaks for meals and exercise. Morning hours are dedicated to important meetings and focused work, with personal activities scheduled after work hours.",
+    }
 }
 
 // Generate time slots for the day (30-minute intervals)
@@ -103,17 +204,35 @@ const generateTimeSlots = (): TimeSlot[] => {
     return slots
 }
 
-export default function TodaysPlanPage() {
-    const [tasks, setTasks] = useState<Task[]>(samplePlan.tasks)
+interface PlanDetailProps {
+    date: string
+}
+
+export function PlanDetail({ date }: PlanDetailProps) {
+    const router = useRouter()
+    const [plan, setPlan] = useState<Plan | null>(null)
+    const [loading, setLoading] = useState(true)
     const timeSlots = generateTimeSlots()
+
+    useEffect(() => {
+        // In a real app, this would be an API call
+        const planData = generatePlanForDate(date)
+        setPlan(planData)
+        setLoading(false)
+    }, [date])
 
     // Toggle task completion status
     const toggleTaskCompletion = (taskId: string) => {
-        setTasks(tasks.map((task) => (task.id === taskId ? { ...task, completed: !task.completed } : task)))
+        if (!plan) return
+
+        setPlan({
+            ...plan,
+            tasks: plan.tasks.map((task) => (task.id === taskId ? { ...task, completed: !task.completed } : task)),
+        })
     }
 
     // Check if a task falls within a time slot
-    const isTaskInTimeSlot = (task: Task, slotTime: Date): boolean => {
+    const isTaskInTimeSlot = (task: Task, slotTime: Date) => {
         const taskStart = parse(task.startTime, "HH:mm", new Date())
         const taskEnd = parse(task.endTime, "HH:mm", new Date())
 
@@ -130,7 +249,8 @@ export default function TodaysPlanPage() {
 
     // Get tasks for a specific time slot
     const getTasksForTimeSlot = (slotTime: Date): Task[] => {
-        return tasks.filter((task) => isTaskInTimeSlot(task, slotTime))
+        if (!plan) return []
+        return plan.tasks.filter((task) => isTaskInTimeSlot(task, slotTime))
     }
 
     // Calculate how many slots a task spans
@@ -152,23 +272,50 @@ export default function TodaysPlanPage() {
         return slotTimeFormatted === taskStartFormatted
     }
 
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
+                <h1 className="text-3xl font-bold tracking-tight mb-6">Loading Plan...</h1>
+            </div>
+        )
+    }
+
+    if (!plan) {
+        return (
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
+                <h1 className="text-3xl font-bold tracking-tight mb-6">Plan Not Found</h1>
+                <Button onClick={() => router.push("/past-plans")}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Past Plans
+                </Button>
+            </div>
+        )
+    }
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <h1 className="text-3xl font-bold tracking-tight mb-6">Today&apos;s Plan</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h1 className="text-3xl font-bold tracking-tight">Plan for {format(plan.date, "EEEE, MMMM d, yyyy")}</h1>
+
+                <Button variant="outline" size="sm" onClick={() => router.push("/past-plans")}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Past Plans
+                </Button>
+            </div>
 
             <Alert className="mb-6">
                 <Info className="h-4 w-4" />
                 <AlertTitle>AI Optimization Explanation</AlertTitle>
-                <AlertDescription>{samplePlan.explanation}</AlertDescription>
+                <AlertDescription>{plan.explanation}</AlertDescription>
             </Alert>
 
             <Card className="mb-6">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <CalendarCheck className="h-5 w-5" />
-                        Your Schedule for {format(samplePlan.date, "EEEE, MMMM d, yyyy")}
+                        Your Schedule
                     </CardTitle>
-                    <CardDescription>Check off tasks as you complete them</CardDescription>
+                    <CardDescription>Review your planned activities for this day</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border">
@@ -249,9 +396,40 @@ export default function TodaysPlanPage() {
                             })}
                         </div>
                     </div>
+                </CardContent>
+            </Card>
 
-                    <div className="mt-6 flex justify-end">
-                        <Button variant="outline">Export Schedule</Button>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Task Summary</CardTitle>
+                    <CardDescription>Overview of all tasks for this day</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-3">
+                        {plan.tasks.map((task) => (
+                            <div
+                                key={task.id}
+                                className={`p-3 rounded-md border flex items-center justify-between ${
+                                    task.completed ? "bg-muted/50" : ""
+                                }`}
+                            >
+                                <div>
+                                    <div className="font-medium flex items-center gap-2">
+                                        <span className={task.completed ? "line-through opacity-70" : ""}>{task.title}</span>
+                                        {task.priority === "high" && <Badge variant="outline">Priority</Badge>}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground mt-1">
+                                        {task.startTime} - {task.endTime} ({task.duration})
+                                    </div>
+                                    <p className="text-sm mt-1">{task.description}</p>
+                                </div>
+                                <Checkbox
+                                    checked={task.completed}
+                                    onCheckedChange={() => toggleTaskCompletion(task.id)}
+                                    aria-label={`Mark ${task.title} as ${task.completed ? "incomplete" : "complete"}`}
+                                />
+                            </div>
+                        ))}
                     </div>
                 </CardContent>
             </Card>
