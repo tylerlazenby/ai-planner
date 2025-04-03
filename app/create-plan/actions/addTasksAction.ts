@@ -61,6 +61,8 @@ Return your response in the following JSON format:
 
     const aiResponse = completion.choices[0]?.message?.content ?? ""
 
+    console.log(aiResponse)
+
     let parsed: {
         explanation: string
         tasks: {
