@@ -1,6 +1,9 @@
 import PastPlansClient from "./PastPlansClient";
 import {PrismaClient} from '@prisma/client'
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 
 export default async function PastPlansPage() {
     const prisma = new PrismaClient()
@@ -26,9 +29,7 @@ export default async function PastPlansPage() {
     })
 
     return (
-        <PastPlansClient
-            pastPlans={plans}
-        />
+        <PastPlansClient pastPlans={plans} />
     )
 }
 

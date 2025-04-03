@@ -3,7 +3,8 @@ import {PrismaClient} from '@prisma/client'
 import { notFound } from "next/navigation"
 
 export const dynamicParams = false
-export const revalidate = 1440
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 const prisma = new PrismaClient()
 

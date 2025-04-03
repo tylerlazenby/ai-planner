@@ -2,6 +2,7 @@
 
 import { PrismaClient, Priority } from "@prisma/client"
 import OpenAI from "openai"
+import { revalidatePath } from "next/cache"
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -128,6 +129,11 @@ Return your response in the following JSON format:
     const result = await prisma.task.createMany({
         data: rawTasks,
     })
+
+    // Revalidate the today's plan page to reflect the changes
+    revalidatePath("/todays-plan")
+    // Also revalidate the past plans page
+    revalidatePath("/past-plans")
 
     return {
         planId: plan.id,
