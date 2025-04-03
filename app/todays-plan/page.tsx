@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlanDetail } from "@/components/plan-detail"
+import {startOfDay} from "date-fns";
 
 // Add this at the top of your file
 export const dynamic = "force-dynamic"
@@ -11,8 +12,10 @@ const prisma = new PrismaClient()
 
 export default async function TodaysPlanPage() {
     // Get today's date in YYYY-MM-DD format
-    const today = new Date()
-    today.setHours(0, 0, 0, 0) // Set to midnight for consistency
+    const today = startOfDay(new Date())
+
+    // Log the date for debugging
+    console.log("Server today's date:", today.toISOString())
 
     // Fetch today's plan with tasks from the database
     const plan = await prisma.plan.findFirst({

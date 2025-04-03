@@ -2,6 +2,7 @@
 
 import { PrismaClient, Priority } from "@prisma/client"
 import OpenAI from "openai"
+import { startOfDay } from "date-fns"
 import { revalidatePath } from "next/cache"
 
 const openai = new OpenAI({
@@ -86,17 +87,17 @@ Return your response in the following JSON format:
 
     const { explanation, tasks: enrichedTasks } = parsed
 
-    const today = new Date();
-    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const today = startOfDay(new Date());
+    console.log("Creating plan for date: ", today.toISOString())
 
     // Create the plan with the explanation
     const plan = await prisma.plan.upsert({
-        where: {date: startOfToday},
+        where: {date: today},
         update: {
             explanation,
         },
         create:  {
-            date: startOfToday,
+            date: today,
             explanation,
         }
     })
@@ -109,7 +110,7 @@ Return your response in the following JSON format:
     const total = enrichedTasks.length
 
     const rawTasks = enrichedTasks.map((task, index) => {
-        let priority: Priority = Priority.MEDIUM
+        let priority
         const ratio = index / total
         if (ratio < 0.33) priority = Priority.HIGH
         else if (ratio < 0.66) priority = Priority.MEDIUM
@@ -130,10 +131,9 @@ Return your response in the following JSON format:
         data: rawTasks,
     })
 
-    // Revalidate the today's plan page to reflect the changes
     revalidatePath("/todays-plan")
-    // Also revalidate the past plans page
     revalidatePath("/past-plans")
+    revalidatePath("/")
 
     return {
         planId: plan.id,

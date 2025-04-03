@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { TaskProvider } from "@/context/task-context"
 import { PlanSchedule } from "@/components/plan-schedule"
 import { TaskList } from "@/components/task-list"
+import { useEffect, useState } from "react"
 
 interface PlanWithTasks extends Plan {
     tasks: Task[]
@@ -24,11 +25,25 @@ interface PlanDetailProps {
 
 export function PlanDetail({ plan, backUrl = "/past-plans", backLabel = "Back to Past Plans" }: PlanDetailProps) {
     const router = useRouter()
+    const [formattedDate, setFormattedDate] = useState<string>("")
+
+    // Format the date on the client side to ensure consistency
+    useEffect(() => {
+        // Handle both string and Date objects
+        const dateObj = typeof plan.date === "string" ? new Date(plan.date) : plan.date
+
+        // Log for debugging
+        console.log("Client date object:", dateObj)
+        console.log("Original plan.date:", plan.date)
+
+        // Format the date
+        setFormattedDate(format(dateObj, "EEEE, MMMM d, yyyy"))
+    }, [plan.date])
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h1 className="text-3xl font-bold tracking-tight">Plan for {format(plan.date, "EEEE, MMMM d, yyyy")}</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Plan for {formattedDate || "Loading..."}</h1>
 
                 <Button variant="outline" size="sm" onClick={() => router.push(backUrl)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
