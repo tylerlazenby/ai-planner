@@ -27,6 +27,13 @@ export function PlanDetail({ plan, backUrl = "/past-plans", backLabel = "Back to
     const router = useRouter()
     const [formattedDate, setFormattedDate] = useState<string>("")
 
+    // Handle both string and Date objects
+    const dateObj = typeof plan.date === "string" ? new Date(plan.date) : plan.date
+
+    // Log for debugging
+    console.log("Client date object:", dateObj)
+    console.log("Original plan.date:", plan.date)
+
     // Format the date on the client side to ensure consistency
     useEffect(() => {
         // Handle both string and Date objects
@@ -37,7 +44,7 @@ export function PlanDetail({ plan, backUrl = "/past-plans", backLabel = "Back to
         console.log("Original plan.date:", plan.date)
 
         // Format the date
-        setFormattedDate(format(dateObj, "EEEE, MMMM d, yyyy"))
+        setFormattedDate(format(plan.date, "EEEE, MMMM d, yyyy"))
     }, [plan.date])
 
     return (
@@ -45,11 +52,17 @@ export function PlanDetail({ plan, backUrl = "/past-plans", backLabel = "Back to
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h1 className="text-3xl font-bold tracking-tight">Plan for {formattedDate || "Loading..."}</h1>
 
+
                 <Button variant="outline" size="sm" onClick={() => router.push(backUrl)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     {backLabel}
                 </Button>
             </div>
+
+            <Alert className="mb-6">
+                <AlertTitle>Current Day Plan Dates Incorrect</AlertTitle>
+                <AlertDescription>We are looking into this and will fix this as soon as possible.</AlertDescription>
+            </Alert>
 
             {plan.explanation && (
                 <Alert className="mb-6">
