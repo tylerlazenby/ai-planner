@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlanDetail } from "@/components/plan-detail"
-import {startOfDay} from "date-fns";
+import {startOfDay, endOfDay} from "date-fns";
 
 // Add this at the top of your file
 export const dynamic = "force-dynamic"
@@ -11,16 +11,22 @@ export const revalidate = 0
 const prisma = new PrismaClient()
 
 export default async function TodaysPlanPage() {
-    // Get today's date in YYYY-MM-DD format
-    const today = startOfDay(new Date())
+    // Get today's date range in UTC
+    const today = new Date()
+    const startOfToday = startOfDay(today)
+    const endOfToday = endOfDay(today)
 
-    // Log the date for debugging
-    console.log("Server today's date:", today.toISOString())
-
+    console.log("Today's date range for query:", {
+        startOfToday: startOfToday.toISOString(),
+        endOfToday: endOfToday.toISOString(),
+    })
     // Fetch today's plan with tasks from the database
     const plan = await prisma.plan.findFirst({
         where: {
-            date: today,
+            date: {
+                gte: startOfToday.toISOString(),
+                lte: endOfToday.toISOString(),
+            },
         },
         include: {
             tasks: true,

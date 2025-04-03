@@ -63,8 +63,6 @@ Return your response in the following JSON format:
 
     const aiResponse = completion.choices[0]?.message?.content ?? ""
 
-    console.log(aiResponse)
-
     let parsed: {
         explanation: string
         tasks: {
@@ -87,17 +85,20 @@ Return your response in the following JSON format:
 
     const { explanation, tasks: enrichedTasks } = parsed
 
-    const today = startOfDay(new Date());
-    console.log("Creating plan for date: ", today.toISOString())
+    // Use startOfDay to get today's date at midnight UTC
+    const today = startOfDay(new Date())
+    const todayISO = today.toISOString()
+
+    console.log("Creating plan for date:", todayISO)
 
     // Create the plan with the explanation
     const plan = await prisma.plan.upsert({
-        where: {date: today},
+        where: {date: todayISO},
         update: {
             explanation,
         },
         create:  {
-            date: today,
+            date: todayISO,
             explanation,
         }
     })

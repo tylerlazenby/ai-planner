@@ -1,5 +1,6 @@
 import PastPlansClient from "./PastPlansClient";
 import {PrismaClient} from '@prisma/client'
+import { startOfDay, endOfDay } from "date-fns"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -7,16 +8,23 @@ export const revalidate = 0
 
 export default async function PastPlansPage() {
     const prisma = new PrismaClient()
-    const now = new Date()
 
-    const startOfToday = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
-    const startOfTomorrow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1))
+    // Get today's date range in UTC
+    const today = new Date()
+    const startOfToday = startOfDay(today)
+    const endOfToday = endOfDay(today)
+
+    console.log("Today's date range for past plans query:", {
+        startOfToday: startOfToday.toISOString(),
+        endOfToday: endOfToday.toISOString(),
+    })
+
     const plans = await prisma.plan.findMany({
         where: {
             NOT: {
                 date: {
-                    gte: startOfToday,
-                    lt: startOfTomorrow,
+                    gte: startOfToday.toISOString(),
+                    lte: endOfToday.toISOString(),
                 },
             },
         },

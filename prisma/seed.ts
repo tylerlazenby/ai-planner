@@ -1,5 +1,5 @@
 import { PrismaClient, Priority } from "@prisma/client"
-import { addDays, subDays } from "date-fns"
+import { subDays, startOfDay } from "date-fns"
 
 const prisma = new PrismaClient()
 
@@ -11,12 +11,14 @@ const main = async () => {
     console.log("Deleted existing data")
 
     // Create today's plan
-    const today = new Date()
-    today.setHours(0, 0, 0, 0) // Set to midnight for consistency
+    const today = startOfDay(new Date())
+    const todayISO = today.toISOString() // Convert to ISO string for consistent storage
+
+    console.log("Creating seed data with today's date:", todayISO)
 
     const todaysPlan = await prisma.plan.create({
         data: {
-            date: today,
+            date: todayISO,
             explanation:
                 "Today's plan prioritizes your most important tasks in the morning when your energy is highest. We've scheduled breaks between focused work sessions and grouped similar tasks together to minimize context switching.",
             tasks: {
@@ -102,8 +104,8 @@ const main = async () => {
 
     // Create some past plans (last 7 days)
     for (let i = 1; i <= 7; i++) {
-        const pastDate = subDays(today, i)
-        pastDate.setHours(0, 0, 0, 0) // Set to midnight for consistency
+        const pastDate = startOfDay(subDays(today, i))
+        const pastDateISO = pastDate.toISOString() // Convert to ISO string
 
         const isWeekend = pastDate.getDay() === 0 || pastDate.getDay() === 6
 
@@ -115,7 +117,7 @@ const main = async () => {
         // Create the plan with different tasks based on weekday/weekend
         const pastPlan = await prisma.plan.create({
             data: {
-                date: pastDate,
+                date: pastDateISO,
                 explanation,
                 tasks: {
                     create: isWeekend
@@ -237,87 +239,6 @@ const main = async () => {
 
         console.log(`Created past plan for ${pastDate.toISOString().split("T")[0]}:`, pastPlan.id)
     }
-
-    // Create a future plan (tomorrow)
-    const tomorrow = addDays(today, 1)
-    tomorrow.setHours(0, 0, 0, 0) // Set to midnight for consistency
-
-    const tomorrowPlan = await prisma.plan.create({
-        data: {
-            date: tomorrow,
-            explanation:
-                "Tomorrow's plan is structured to help you tackle the most challenging tasks during your peak productivity hours. We've included buffer time between meetings to allow for preparation and follow-up.",
-            tasks: {
-                create: [
-                    {
-                        title: "Review weekly goals",
-                        description: "Check progress on weekly objectives and adjust as needed",
-                        startTime: "08:30",
-                        endTime: "09:00",
-                        duration: "30 minutes",
-                        completed: false,
-                        priority: Priority.MEDIUM,
-                    },
-                    {
-                        title: "Department meeting",
-                        description: "Monthly department sync with all team leads",
-                        startTime: "09:30",
-                        endTime: "11:00",
-                        duration: "1.5 hours",
-                        completed: false,
-                        priority: Priority.HIGH,
-                    },
-                    {
-                        title: "Focus block: Documentation",
-                        description: "Update project documentation and knowledge base",
-                        startTime: "11:30",
-                        endTime: "12:30",
-                        duration: "1 hour",
-                        completed: false,
-                        priority: Priority.MEDIUM,
-                    },
-                    {
-                        title: "Lunch with mentor",
-                        description: "Career discussion over lunch",
-                        startTime: "12:30",
-                        endTime: "13:30",
-                        duration: "1 hour",
-                        completed: false,
-                        priority: Priority.HIGH,
-                    },
-                    {
-                        title: "Code review",
-                        description: "Review pull requests from the team",
-                        startTime: "14:00",
-                        endTime: "15:30",
-                        duration: "1.5 hours",
-                        completed: false,
-                        priority: Priority.HIGH,
-                    },
-                    {
-                        title: "One-on-one with direct report",
-                        description: "Weekly check-in with junior developer",
-                        startTime: "16:00",
-                        endTime: "16:30",
-                        duration: "30 minutes",
-                        completed: false,
-                        priority: Priority.MEDIUM,
-                    },
-                    {
-                        title: "Dentist appointment",
-                        description: "Regular checkup",
-                        startTime: "17:30",
-                        endTime: "18:30",
-                        duration: "1 hour",
-                        completed: false,
-                        priority: Priority.HIGH,
-                    },
-                ],
-            },
-        },
-    })
-
-    console.log("Created tomorrow's plan:", tomorrowPlan.id)
 }
 
 main()
