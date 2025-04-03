@@ -1,8 +1,9 @@
 "use client"
 
 import {CalendarCheck, History, ListTodo} from "lucide-react"
-import {Instructions, NavCard, Top} from './HomeElements'
+import {Instructions, NavCard, Top} from './HomeComponents'
 
+// 'use client' to allow passing the icons
 export default function HomePage() {
     return (
         <div className="container mx-auto px-4 py-8">

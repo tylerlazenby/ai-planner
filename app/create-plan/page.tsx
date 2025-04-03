@@ -1,17 +1,16 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
-    DndContext,
     closestCenter,
+    DndContext,
+    type DragEndEvent,
     KeyboardSensor,
     PointerSensor,
     useSensor,
     useSensors,
-    type DragEndEvent,
 } from "@dnd-kit/core"
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { ArrowRight, Info } from "lucide-react"
@@ -20,7 +19,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
 import { SortableTaskItem } from "./sortable-task-item"
+import addTasksAction from "@/app/create-plan/actions/addTasksAction"
 
 // Task type definition
 interface Task {
@@ -33,6 +34,7 @@ export default function CreatePlanPage() {
     const [tasks, setTasks] = useState<Task[]>([])
     const [newTask, setNewTask] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [progress, setProgress] = useState(0)
 
     // Configure sensors for drag and drop
     const sensors = useSensors(
@@ -74,19 +76,66 @@ export default function CreatePlanPage() {
         }
     }
 
+    // Simulate progress during submission
+    useEffect(() => {
+        if (isSubmitting) {
+            const interval = setInterval(() => {
+                setProgress((prevProgress) => {
+                    // Increase progress up to 90% (the last 10% will be completed after the action finishes)
+                    if (prevProgress >= 90) {
+                        clearInterval(interval)
+                        return 90
+                    }
+                    return prevProgress + 2
+                })
+            }, 300)
+
+            return () => clearInterval(interval)
+        } else {
+            // Reset progress when not submitting
+            setProgress(0)
+        }
+    }, [isSubmitting])
+
     // Handle form submission
     const handleSubmit = async () => {
         if (tasks.length === 0) return
 
         setIsSubmitting(true)
+        setProgress(10) // Start with some initial progress
 
-        // Here you would normally send the tasks to your API
-        // For now, we'll simulate a delay and redirect
-        setTimeout(() => {
-            // In a real app, you'd send the tasks to your backend
-            // and then redirect to the plan page after processing
-            router.push("/todays-plan")
-        }, 2000)
+        try {
+            const result = await addTasksAction(tasks)
+
+            if (result) {
+                // Set progress to 100% before redirecting
+                setProgress(100)
+
+                // Short delay to show the completed progress bar before redirecting
+                setTimeout(() => {
+                    router.push("/todays-plan")
+                }, 800)
+            } else {
+                // Handle error case
+                setIsSubmitting(false)
+                setProgress(0)
+                // You could add error notification here
+            }
+        } catch (error) {
+            console.error("Error creating plan:", error)
+            setIsSubmitting(false)
+            setProgress(0)
+            // You could add error notification here
+        }
+    }
+
+    // Get the appropriate progress message based on current progress
+    const getProgressMessage = () => {
+        if (progress < 30) return "Analyzing your tasks..."
+        if (progress < 50) return "Determining optimal schedule..."
+        if (progress < 70) return "Prioritizing based on importance..."
+        if (progress < 90) return "Finalizing your daily plan..."
+        return "Plan created! Redirecting..."
     }
 
     return (
@@ -115,8 +164,11 @@ export default function CreatePlanPage() {
                             value={newTask}
                             onChange={(e) => setNewTask(e.target.value)}
                             className="flex-grow"
+                            disabled={isSubmitting}
                         />
-                        <Button type="submit">Add</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            Add
+                        </Button>
                     </form>
                 </CardContent>
             </Card>
@@ -141,6 +193,7 @@ export default function CreatePlanPage() {
                                             id={task.id}
                                             content={task.content}
                                             onRemove={() => handleRemoveTask(task.id)}
+                                            disabled={isSubmitting}
                                         />
                                     ))}
                                 </ul>
@@ -149,7 +202,13 @@ export default function CreatePlanPage() {
                     )}
                 </CardContent>
                 {tasks.length > 0 && (
-                    <CardFooter>
+                    <CardFooter className="flex flex-col gap-4">
+                        {isSubmitting && (
+                            <div className="w-full">
+                                <Progress value={progress} className="h-2 mb-2" />
+                                <p className="text-sm text-center text-muted-foreground">{getProgressMessage()}</p>
+                            </div>
+                        )}
                         <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full">
                             {isSubmitting ? "Creating your plan..." : "Create My Plan"}
                             {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
@@ -160,3 +219,4 @@ export default function CreatePlanPage() {
         </div>
     )
 }
+

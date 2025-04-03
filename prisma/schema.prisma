@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Daily plan model
+model Plan {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  date        DateTime @unique // One plan per day
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  explanation String?
+  tasks       Task[] // Relationship to tasks
+}
+
+// Task model
+model Task {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  startTime   String // Format: "HH:MM" (24-hour)
+  endTime     String // Format: "HH:MM" (24-hour)
+  duration    String? // Human-readable duration (e.g., "1.5 hours")
+  priority    Priority @default(MEDIUM)
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationship to plan
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String @db.ObjectId
+}
+
+// Priority enum for tasks
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
