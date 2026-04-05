@@ -91,9 +91,6 @@ export default function CreatePlanPage() {
             }, 300)
 
             return () => clearInterval(interval)
-        } else {
-            // Reset progress when not submitting
-            setProgress(0)
         }
     }, [isSubmitting])
 

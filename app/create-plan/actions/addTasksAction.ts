@@ -89,8 +89,6 @@ Return your response in the following JSON format:
     const today = startOfDay(new Date())
     const todayISO = today.toISOString()
 
-    console.log("Creating plan for date:", todayISO)
-
     // Create the plan with the explanation
     const plan = await prisma.plan.upsert({
         where: {date: todayISO},

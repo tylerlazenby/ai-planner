@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { TaskProvider } from "@/context/task-context"
 import { PlanSchedule } from "@/components/plan-schedule"
 import { TaskList } from "@/components/task-list"
-import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 
 interface PlanWithTasks extends Plan {
@@ -27,55 +26,53 @@ interface PlanDetailProps {
 export function PlanDetail({ plan, backUrl = "/past-plans", backLabel = "Back to Past Plans" }: PlanDetailProps) {
     const router = useRouter()
     const pathname = usePathname()
-    const [formattedDate, setFormattedDate] = useState<string>("")
 
     // Format the date on the client side to ensure consistency
-    useEffect(() => {
-        try {
-            // Check if we're on the Today's Plan page using Next.js pathname
-            const isOnTodaysPlanPage = pathname === "/todays-plan"
+    let formattedDate: string
+    try {
+        // Check if we're on the Today's Plan page using Next.js pathname
+        const isOnTodaysPlanPage = pathname === "/todays-plan"
 
-            if (isOnTodaysPlanPage) {
-                // If we're on the Today's Plan page, always use today's date
-                const today = new Date()
-                setFormattedDate(format(today, "EEEE, MMMM d, yyyy"))
-            } else {
-                // For other pages (past plans), use the date from the database
-                if (typeof plan.date === "string") {
-                    // Handle different date formats
-                    let dateObj: Date
+        if (isOnTodaysPlanPage) {
+            // If we're on the Today's Plan page, always use today's date
+            const today = new Date()
+            formattedDate = format(today, "EEEE, MMMM d, yyyy")
+        } else {
+            // For other pages (past plans), use the date from the database
+            if (typeof plan.date === "string") {
+                // Handle different date formats
+                let dateObj: Date
 
-                    // Check if the date string contains a 'T' character (ISO format)
-                    const dateStr = plan.date as string
-                    if (dateStr.indexOf("T") !== -1) {
-                        // If it's an ISO string like "2025-04-03T00:00:00.000Z" or "2025-04-03T06:00:00.000Z"
-                        dateObj = new Date(dateStr)
-                    } else {
-                        // If it's just a date string like "2025-04-03"
-                        // Extract just the date part (YYYY-MM-DD) and create a date in local timezone
-                        const dateParts = dateStr.split("-").map(Number)
-                        const year = dateParts[0]
-                        const month = dateParts[1]
-                        const day = dateParts[2]
-                        dateObj = new Date(year, month - 1, day)
-                    }
-
-                    // Format the date
-                    setFormattedDate(format(dateObj, "EEEE, MMMM d, yyyy"))
-                } else if (plan.date instanceof Date) {
-                    // If it's already a Date object
-                    setFormattedDate(format(plan.date, "EEEE, MMMM d, yyyy"))
+                // Check if the date string contains a 'T' character (ISO format)
+                const dateStr = plan.date as string
+                if (dateStr.indexOf("T") !== -1) {
+                    // If it's an ISO string like "2025-04-03T00:00:00.000Z" or "2025-04-03T06:00:00.000Z"
+                    dateObj = new Date(dateStr)
                 } else {
-                    // Fallback
-                    setFormattedDate("Unknown date format")
+                    // If it's just a date string like "2025-04-03"
+                    // Extract just the date part (YYYY-MM-DD) and create a date in local timezone
+                    const dateParts = dateStr.split("-").map(Number)
+                    const year = dateParts[0]
+                    const month = dateParts[1]
+                    const day = dateParts[2]
+                    dateObj = new Date(year, month - 1, day)
                 }
+
+                // Format the date
+                formattedDate = format(dateObj, "EEEE, MMMM d, yyyy")
+            } else if (plan.date instanceof Date) {
+                // If it's already a Date object
+                formattedDate = format(plan.date, "EEEE, MMMM d, yyyy")
+            } else {
+                // Fallback
+                formattedDate = "Unknown date format"
             }
-        } catch (error) {
-            console.error("Error formatting date:", error)
-            // Fallback to displaying the raw date
-            setFormattedDate(String(plan.date))
         }
-    }, [plan.date, pathname])
+    } catch (error) {
+        console.error("Error formatting date:", error)
+        // Fallback to displaying the raw date
+        formattedDate = String(plan.date)
+    }
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -129,4 +126,3 @@ export function PlanDetail({ plan, backUrl = "/past-plans", backLabel = "Back to
         </div>
     )
 }
-
