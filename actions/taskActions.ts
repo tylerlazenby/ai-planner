@@ -1,14 +1,16 @@
 "use server"
 
-import { PrismaClient } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@/generated/prisma/client";
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 /**
  * Toggle the completion status of a task
  */
-export async function toggleTaskCompletion(taskId: string, currentStatus: boolean) {
+export async function toggleTaskCompletion(taskId: number, currentStatus: boolean) {
     try {
         // Update the task in the database
         await prisma.task.update({
