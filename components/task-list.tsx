@@ -1,6 +1,6 @@
 "use client"
 
-import type { Priority } from "@prisma/client"
+import type { Priority } from "@/generated/prisma/client"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { useTasks } from "@/context/task-context"

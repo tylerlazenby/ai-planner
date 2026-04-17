@@ -1,14 +1,12 @@
 "use server"
 
-import { PrismaClient } from "@prisma/client"
+import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-
-const prisma = new PrismaClient()
 
 /**
  * Toggle the completion status of a task
  */
-export async function toggleTaskCompletion(taskId: string, currentStatus: boolean) {
+export async function toggleTaskCompletion(taskId: number, currentStatus: boolean) {
     try {
         // Update the task in the database
         await prisma.task.update({
@@ -29,4 +27,3 @@ export async function toggleTaskCompletion(taskId: string, currentStatus: boolea
         return { success: false, error: "Failed to update task" }
     }
 }
-

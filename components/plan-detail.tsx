@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { ArrowLeft, CalendarCheck, Info, RefreshCw } from "lucide-react"
-import type { Plan, Task } from "@prisma/client"
+import type { Plan, Task } from "@/generated/prisma/client"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

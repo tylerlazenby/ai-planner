@@ -1,7 +1,14 @@
-import { PrismaClient, Priority } from "@prisma/client"
-import { subDays, startOfDay } from "date-fns"
 
-const prisma = new PrismaClient()
+import { subDays, startOfDay } from "date-fns"
+import "dotenv/config";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient, Priority } from "@/generated/prisma/client";
+
+const connectionString = `${process.env.DATABASE_URL}?sslmode=verify-full`;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 const main = async () => {
     // Clear existing data
@@ -250,4 +257,3 @@ main()
         await prisma.$disconnect()
         process.exit(1)
     })
-

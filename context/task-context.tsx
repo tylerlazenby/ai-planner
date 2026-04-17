@@ -1,13 +1,13 @@
 "use client"
 
 import { createContext, useContext, useState, useTransition, type ReactNode } from "react"
-import type { Task } from "@prisma/client"
+import type { Task } from "@/generated/prisma/client"
 import { toggleTaskCompletion } from "@/actions/taskActions"
 
 interface TaskContextType {
     tasks: Task[]
-    pendingTaskIds: Set<string>
-    toggleTask: (taskId: string, currentStatus: boolean) => void
+    pendingTaskIds: Set<number>
+    toggleTask: (taskId: number, currentStatus: boolean) => void
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined)
@@ -15,9 +15,9 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined)
 export function TaskProvider({ children, initialTasks }: { children: ReactNode; initialTasks: Task[] }) {
     const [tasks, setTasks] = useState<Task[]>(initialTasks)
     const [, startTransition] = useTransition() // Removed the unused isPending state
-    const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(new Set())
+    const [pendingTaskIds, setPendingTaskIds] = useState<Set<number>>(new Set())
 
-    const toggleTask = (taskId: string, currentStatus: boolean) => {
+    const toggleTask = (taskId: number, currentStatus: boolean) => {
         // Optimistically update the UI
         setTasks(tasks.map((task) => (task.id === taskId ? { ...task, completed: !currentStatus } : task)))
 
@@ -39,7 +39,7 @@ export function TaskProvider({ children, initialTasks }: { children: ReactNode; 
 
             // Remove task from pending set
             setPendingTaskIds((prev) => {
-                const newSet = new Set(prev)
+                const newSet = new Set<number>(prev)
                 newSet.delete(taskId)
                 return newSet
             })
