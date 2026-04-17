@@ -13,16 +13,22 @@ datasource db {
 }
 
 // Daily plan model
+
 model Plan {
   id          Int      @id @default(autoincrement()) @map("_id")
-  date        DateTime @unique // One plan per day
+  date        DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   explanation String?
   tasks       Task[] // Relationship to tasks
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([date, userId]) // Ensure one plan per user per day
 }
 
 // Task model
+
 model Task {
   id          Int      @id @default(autoincrement()) @map("_id")
   title       String
@@ -41,8 +47,73 @@ model Task {
 }
 
 // Priority enum for tasks
+
 enum Priority {
   LOW
   MEDIUM
   HIGH
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  plans         Plan[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

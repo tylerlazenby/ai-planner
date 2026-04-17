@@ -1,9 +1,8 @@
 
-import { subDays, startOfDay } from "date-fns"
 import "dotenv/config";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Priority } from "@/generated/prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
 
 const connectionString = `${process.env.DATABASE_URL}?sslmode=verify-full`;
 const pool = new Pool({ connectionString });
@@ -11,7 +10,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const main = async () => {
-    // Clear existing data
+    /*// Clear existing data
     await prisma.task.deleteMany()
     await prisma.plan.deleteMany()
 
@@ -245,7 +244,7 @@ const main = async () => {
         })
 
         console.log(`Created past plan for ${pastDate.toISOString().split("T")[0]}:`, pastPlan.id)
-    }
+    }*/
 }
 
 main()
