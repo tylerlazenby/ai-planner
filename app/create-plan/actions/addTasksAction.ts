@@ -1,6 +1,7 @@
 'use server'
 
-import { PrismaClient, Priority } from "@prisma/client"
+import { Priority } from "@/generated/prisma/client"
+import prisma from '@/lib/prisma'
 import OpenAI from "openai"
 import { startOfDay } from "date-fns"
 import { revalidatePath } from "next/cache"
@@ -15,7 +16,6 @@ interface TaskInput {
 }
 
 const addTasksAction = async (tasks: TaskInput[]) => {
-    const prisma = new PrismaClient()
 
     if (!tasks.length) {
         console.error("No tasks to add.")

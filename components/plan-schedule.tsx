@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { format, addMinutes, parse, differenceInMinutes } from "date-fns"
 import { Clock } from "lucide-react"
-import type { Task } from "@prisma/client"
+import type { Task } from "@/generated/prisma/client"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
