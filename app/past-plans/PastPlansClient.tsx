@@ -7,7 +7,7 @@ import {format} from "date-fns";
 import Link from "next/link";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
-import {Plan, Task} from '@prisma/client'
+import {Plan, Task} from '@/generated/prisma/client'
 
 interface PlanWithTasks extends Plan {
     tasks: Task[]
