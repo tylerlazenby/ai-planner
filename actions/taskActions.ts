@@ -1,11 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@/generated/prisma/client";
-
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+import prisma from "@/lib/prisma"
 
 /**
  * Toggle the completion status of a task
@@ -33,4 +29,3 @@ export async function toggleTaskCompletion(taskId: number, currentStatus: boolea
         return { success: false, error: "Failed to update task" }
     }
 }
-

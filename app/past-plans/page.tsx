@@ -1,13 +1,12 @@
 import PastPlansClient from "./PastPlansClient";
-import {PrismaClient} from '@prisma/client'
 import { startOfDay, endOfDay } from "date-fns"
+import prisma from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-
 export default async function PastPlansPage() {
-    const prisma = new PrismaClient()
+
 
     // Get today's date range in UTC
     const today = new Date()
@@ -40,4 +39,3 @@ export default async function PastPlansPage() {
         <PastPlansClient pastPlans={plans} />
     )
 }
-

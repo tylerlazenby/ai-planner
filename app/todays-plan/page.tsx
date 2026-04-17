@@ -1,13 +1,10 @@
-import { PrismaClient } from "@prisma/client"
+import prisma from "@/lib/prisma"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlanDetail } from "@/components/plan-detail"
 
 // Add this at the top of your file
 export const dynamic = "force-dynamic"
 export const revalidate = 0
-
-// Initialize Prisma client
-const prisma = new PrismaClient()
 
 export default async function TodaysPlanPage() {
     // Get today's date range in UTC
@@ -51,4 +48,3 @@ export default async function TodaysPlanPage() {
 
     return <PlanDetail plan={plan} backUrl="/" backLabel="Back to Home" />
 }
-

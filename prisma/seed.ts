@@ -5,7 +5,7 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Priority } from "@/generated/prisma/client";
 
-const connectionString = `${process.env.DATABASE_URL}`;
+const connectionString = `${process.env.DATABASE_URL}?sslmode=verify-full`;
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
@@ -257,4 +257,3 @@ main()
         await prisma.$disconnect()
         process.exit(1)
     })
-

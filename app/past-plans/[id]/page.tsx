@@ -1,12 +1,10 @@
 import {PlanDetail} from "@/components/plan-detail"
-import {PrismaClient} from '@prisma/client'
 import { notFound } from "next/navigation"
+import prisma from "@/lib/prisma"
 
 export const dynamicParams = false
 export const dynamic = "force-dynamic"
 export const revalidate = 0
-
-const prisma = new PrismaClient()
 
 export async function generateStaticParams() {
     const now = new Date()
@@ -29,7 +27,7 @@ export async function generateStaticParams() {
     })
 
     return plans.map(plan => {
-         return { id: plan.id }
+         return { id: plan.id.toString() }
     })
 }
 
@@ -45,7 +43,7 @@ export default async function PlanDetailPage({params}: { params: Promise<{ id: s
 
     const plan = await prisma.plan.findUniqueOrThrow({
         where: {
-            id: resolvedParams.id,
+            id: parseInt(resolvedParams.id),
             NOT: {
                 date: {
                     gte: startOfToday,
@@ -69,4 +67,3 @@ export default async function PlanDetailPage({params}: { params: Promise<{ id: s
 
     return <PlanDetail plan={plan}/>
 }
-
